@@ -60,12 +60,15 @@ class Parser (private val text : String){
     }
 
     private fun handleError(errorMessage : String) : Nothing {
+
         val charPos = tokens[pointer - 1].start
 
-        System.err.println("Parser Error: $errorMessage")
-        System.err.println(text)
-        System.err.println(" ".repeat(charPos) + "^ (at char $charPos)")
-        exitProcess(1)
-    }
+        val message = """Parser Error: $errorMessage" 
+        $text
+        ${" ".repeat(charPos) + "^ (at char $charPos)"}
+        """.trimIndent()
 
+        throw ParsingException(message)
+
+    }
 }

@@ -59,10 +59,12 @@ class Lexer(private val text : String) {
         }
 
     private fun errorHandling(errorMessage : String) : Nothing {
-        System.err.println("Lexer Error: $errorMessage")
-        System.err.println(text)
-        System.err.println(" ".repeat(pointer) + "^ (at char $pointer)")
-        exitProcess(1)
+        val message = """Lexer Error: $errorMessage
+        $text
+        ${" ".repeat(pointer) + "^ (at char $pointer)"}
+        """.trimIndent()
+
+        throw ParsingException(message)
     }
 
 }
