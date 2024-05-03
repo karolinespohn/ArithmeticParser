@@ -1,5 +1,3 @@
-import kotlin.system.exitProcess
-
 sealed class Token {
     abstract val start : Int
     data class Number(val value : Int, override val start: Int) : Token()
@@ -59,12 +57,7 @@ class Lexer(private val text : String) {
         }
 
     private fun errorHandling(errorMessage : String) : Nothing {
-        val message = """Lexer Error: $errorMessage
-        $text
-        ${" ".repeat(pointer) + "^ (at char $pointer)"}
-        """.trimIndent()
-
-        throw ParsingException(message)
+        throw ParsingException("Lexer", errorMessage, text, pointer)
     }
 
 }

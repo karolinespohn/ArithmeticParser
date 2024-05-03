@@ -1,5 +1,3 @@
-import kotlin.system.exitProcess
-
 class Parser (private val text : String){
     private val tokens = Lexer(text).scanText()
     private var pointer = 0
@@ -60,15 +58,8 @@ class Parser (private val text : String){
     }
 
     private fun handleError(errorMessage : String) : Nothing {
-
         val charPos = tokens[pointer - 1].start
-
-        val message = """Parser Error: $errorMessage" 
-        $text
-        ${" ".repeat(charPos) + "^ (at char $charPos)"}
-        """.trimIndent()
-
-        throw ParsingException(message)
+        throw ParsingException("Parser", errorMessage, text, charPos)
 
     }
 }
