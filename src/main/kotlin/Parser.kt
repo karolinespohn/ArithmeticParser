@@ -1,46 +1,71 @@
-import java.lang.IllegalArgumentException
+import kotlin.system.exitProcess
 
-class Parser (text : String){
-    val tokens = Lexer(text).scanText()
-    var pointer = 0
+class Parser (private val text : String){
+    private val tokens = Lexer(text).scanText()
+    private var pointer = 0
 
-    fun peek() : Token = tokens[pointer]
-    fun consume() : Token = peek().also { pointer++ }
+    private fun peek() : Token = tokens[pointer]
+    private fun consume() : Token = peek().also { pointer++ }
+    private inline fun <reified ExpectedTokenType : Token> consumeExpected(errorMessage : String) {
+        if (consume() !is ExpectedTokenType) {
+            handleError(errorMessage)
+        }
+    }
 
-    fun expression() : Exp =
+    fun parse() : Exp {
+        val exp = expression()
+        consumeExpected<Token.EOF>("Expected end of file")
+        return exp
+    }
+
+    private fun expression() : Exp =
         when(peek()) {
-            Token.Element -> Exp.Element.also { pointer++ }
-            Token.OpenParen -> binExp()
+            is Token.Element -> Exp.Element.also { pointer++ }
+            is Token.OpenParen -> binExp()
             else -> constExp()
         }
 
-    fun binExp() : Exp.BinExp {
-        consume() // for open paren
+    private fun binExp() : Exp.BinExp {
+        consumeExpected<Token.OpenParen>("Expected \"(\"")
         val left = expression()
         val operation = when (consume()) {
-            Token.Plus -> Operation.Plus
-            Token.Minus -> Operation.Minus
-            Token.Times -> Operation.Times
-            else -> throw IllegalArgumentException()
+            is Token.Plus -> Operation.Plus
+            is Token.Minus -> Operation.Minus
+            is Token.Times -> Operation.Times
+            else -> handleError("Expected an operator (\"+\", \"-\" or \"*\")")
         }
         val right = expression()
-        consume() // for closed paren
+        consumeExpected<Token.ClosedParen>("Expected \")\"")
 
-        return Exp.BinExp(operation, left, right)
+        return Exp.BinExp(left, operation, right)
     }
 
-    fun constExp() : Exp.ConstExp {
+    private fun constExp() : Exp.ConstExp {
         val start = consume()
-        if (start == Token.Minus) {
+        if (start is Token.Minus) {
             val number = consume()
-            if (number is Token.Number) return Exp.ConstExp(-number.value)
+            if (number is Token.Number) {
+                return Exp.ConstExp(-number.value)
+            } else {
+                handleError("Expected a number")
+            }
 
-            throw IllegalArgumentException()
         }
 
-        if (start is Token.Number) return Exp.ConstExp(start.value)
+        if (start is Token.Number) {
+            return Exp.ConstExp(start.value)
+        } else {
+            handleError("Expected a number")
+        }
+    }
 
-        throw IllegalArgumentException()
+    private fun handleError(errorMessage : String) : Nothing {
+        val charPos = tokens[pointer - 1].start
+
+        System.err.println("Parser Error: $errorMessage")
+        System.err.println(text)
+        System.err.println(" ".repeat(charPos) + "^ (at char $charPos)")
+        exitProcess(1)
     }
 
 }
