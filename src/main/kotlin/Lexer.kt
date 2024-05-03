@@ -18,14 +18,18 @@ class Lexer(val text : String) {
         val tokens = mutableListOf<Token>()
 
         while (pointer < text.length) {
-            tokens.add(chooseToken())
+            val token = chooseToken()
+            if (token != null) {
+                tokens.add(token)
+            }
         }
         tokens.add(Token.EOF)
         return tokens
     }
 
-    private fun chooseToken() : Token =
+    private fun chooseToken() : Token? =
         when (text[pointer]) {
+            ' ', '\n' -> null.also { pointer++ }
             '+' -> Token.Plus.also { pointer++ }
             '-' -> Token.Minus.also { pointer++ }
             '*' -> Token.Times.also { pointer++ }
