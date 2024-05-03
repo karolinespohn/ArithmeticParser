@@ -1,6 +1,8 @@
 sealed class Exp{
-    object Element: Exp()
-    data class BinExp(val operation : Operation, val left : Exp, val right : Exp): Exp()
+    object Element: Exp() {
+        override fun toString(): String = "element"
+    }
+    data class BinExp(val left : Exp, val operation: Operation, val right : Exp): Exp()
     data class ConstExp(val value : Int) : Exp()
 }
 
