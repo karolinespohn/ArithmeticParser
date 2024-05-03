@@ -8,8 +8,8 @@ class Tests{
     @Test
     fun `test for errors`(){
         // Lexer Errors
-        assertThrows<ParsingException> { parse("elephant") }
-        assertThrows<ParsingException> { parse("älämänt") }
+        assertThrows<ParsingException> { parse("elephant") } // word that starts with e but isn't element
+        assertThrows<ParsingException> { parse("älämänt") } // non-asci
         assertThrows<ParsingException> { parse(",") }
 
         // Parser Errors
@@ -35,6 +35,8 @@ class Tests{
                 BinExp(ConstExp(3), Minus, ConstExp(4)))), parse("(1 + (2 * (3 -4)))"))
         assertEquals(BinExp(ConstExp(-1), Plus, ConstExp(-2)), parse("(-1 + -2)"))
         assertEquals(BinExp(ConstExp(-1), Minus, ConstExp(-2)), parse("(-1 - -2)"))
+        assertEquals(BinExp(BinExp(ConstExp(2), Minus, ConstExp(-4)),
+            Times, BinExp(ConstExp(-4), Minus, ConstExp(2))), parse("((2 - -4) * (-4 - 2))"))
     }
 
     @Test
